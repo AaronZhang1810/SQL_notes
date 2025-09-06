@@ -2,10 +2,10 @@
 \usepackage[left=0.6in,top=0.6in,right=0.6in,bottom=0.6in]{geometry}
 \usepackage{xcolor}
 \usepackage{listings}
-\usepackage{parskip}
+%\usepackage{parskip}
 \usepackage{enumitem}
-\setlist[enumerate]{leftmargin=5mm}
-\setlist[itemize]{leftmargin=*, nosep}
+%\setlist[enumerate]{leftmargin=5mm}
+\setlist[itemize]{leftmargin=*}
 \usepackage{amsmath,amssymb,graphicx}
 \usepackage{titling} % adjust spaces for title
 \usepackage{ctex}
@@ -231,7 +231,7 @@
 			JOIN Shippers ON Orders.ShipperID = Shippers.ShipperID);
 		\end{lstlisting}
 		
-		\item The underlying details of \texttt{\color{red} INNER JOIN}, \texttt{\color{red} LEFT JOIN}, \texttt{\color{red} RIGHT JOIN}, and \texttt{\color{red} FULL JOIN}:\\
+		\item The underlying details of \texttt{\color{red} INNER JOIN}, \texttt{\color{red} LEFT JOIN}, \texttt{\color{red} RIGHT JOIN}, and \texttt{\color{red} FULL JOIN}:
 		
 		Let the \texttt{employee} table be
 		\begin{tabular}{|c|c|c|}
@@ -249,9 +249,9 @@
 			20 & Marketing\\
 			30 & IT\\
 			50 & Finance
-		\end{tabular} .\\
+		\end{tabular}
 		
-		Then, ``\texttt{employee JOIN department ON employee.DeptID = department.DeptID}'' creates the following table:\\
+		Then, ``\texttt{employee JOIN department ON employee.DeptID = department.DeptID}'' creates the following table:
 		\begin{center}
 			\begin{tabular}{|c|c|c|c|c|}
 				employee.ID & employee.Name  & employee.DeptID & department.DeptID & DeptID.DeptName \\
@@ -261,9 +261,8 @@
 				3  & Carol & 10 & 10 & Sales
 			\end{tabular}
 		\end{center}
-		\vspace*{4mm}
 		
-		``\texttt{employee LEFT JOIN department ON employee.DeptID = department.DeptID}'' creates the following table:\\
+		``\texttt{employee LEFT JOIN department ON employee.DeptID = department.DeptID}'' creates the following table:
 		\begin{center}
 			\begin{tabular}{|c|c|c|c|c|}
 				employee.ID & employee.Name  & employee.DeptID & department.DeptID & DeptID.DeptName \\
@@ -275,9 +274,7 @@
 			\end{tabular}
 		\end{center}
 		
-		\vspace*{4mm}
-		
-		``\texttt{employee RIGHT JOIN department ON employee.DeptID = department.DeptID}'' creates the following table:\\
+		``\texttt{employee RIGHT JOIN department ON employee.DeptID = department.DeptID}'' creates the following table:
 		\begin{center}
 			\begin{tabular}{|c|c|c|c|c|}
 				employee.ID & employee.Name  & employee.DeptID & department.DeptID & DeptID.DeptName \\
@@ -288,9 +285,8 @@
 				4  & David & 40 & NULL & NULL
 			\end{tabular}
 		\end{center}
-		\vspace*{4mm}
 		
-		``\texttt{employee FULL JOIN department ON employee.DeptID = department.DeptID}'' creates the following table:\\
+		``\texttt{employee FULL JOIN department ON employee.DeptID = department.DeptID}'' creates the following table:
 		\begin{center}
 			\begin{tabular}{|c|c|c|c|c|}
 				employee.ID & employee.Name  & employee.DeptID & department.DeptID & DeptID.DeptName \\
@@ -303,11 +299,10 @@
 				NULL  & NULL & NULL & 50 & Finance
 			\end{tabular}
 		\end{center}
-		\vspace*{4mm}
 		
-		Therefore, combined with \texttt{SELECT} ... \texttt{FROM} ..., it is easy to understand what's happening. Also, it is clear that table1 LEFT JOIN table2 is the same as table2 RIGHT JOIN table1, with the only difference be the column order.\\
+		Therefore, combined with \texttt{SELECT} ... \texttt{FROM} ..., it is easy to understand what's happening. Also, it is clear that table1 LEFT JOIN table2 is the same as table2 RIGHT JOIN table1, with the only difference be the column order.
 		
-		Now, observe that in the above example, the matching columns have unrepeated values in at least one of the two tables (in the example, Dept.ID in \texttt{department} is unrepeated). What if both have repeated values?\\
+		Now, observe that in the above example, the matching columns have unrepeated values in at least one of the two tables (in the example, Dept.ID in \texttt{department} is unrepeated). What if both have repeated values?
 		
 		When the join columns aren't unique in either table, you get a Cartesian product of the matching rows - every matching row from table1 is combined with every matching row from table2. For example, let the \texttt{department} table be
 		\begin{tabular}{|c|c|}
@@ -316,9 +311,9 @@
 			10 & Sales\\
 			20 & Marketing\\
 			10 & Sales
-		\end{tabular} instead.\\
+		\end{tabular} instead.
 		
-		Then, ``\texttt{employee JOIN department ON employee.DeptID = department.DeptID}'' creates the following table:\\
+		Then, ``\texttt{employee JOIN department ON employee.DeptID = department.DeptID}'' creates the following table:
 		\begin{center}
 			\begin{tabular}{|c|c|c|c|c|}
 				employee.ID & employee.Name  & employee.DeptID & department.DeptID & DeptID.DeptName \\
@@ -330,6 +325,82 @@
 				3  & Carol & 10 & 10 & Sales
 			\end{tabular}
 		\end{center}
+		
+		\item Self join example:
+		
+		Select pairs of customer names that are from the same city
+		\begin{lstlisting}
+			SELECT A.CustomerName AS CustomerName1, B.CustomerName AS CustomerName2, A.City
+			FROM Customers A, Customers B
+			WHERE A.CustomerID <> B.CustomerID
+			AND A.City = B.City
+			ORDER BY A.City;
+		\end{lstlisting}
+		
+		Select and concatenate all customer names that are from the same city
+		\begin{lstlisting}
+			SELECT City, 
+			GROUP_CONCAT(CustomerName SEPARATOR ', ') AS AllCustomersInCity
+			FROM Customers
+			GROUP BY City;
+			
+			-- sort the names and cities
+			SELECT City, 
+			GROUP_CONCAT(CustomerName ORDER BY CustomerName SEPARATOR ', ') AS AllCustomersInCity
+			FROM Customers
+			GROUP BY City
+			ORDER BY City;
+			
+			-- ignore city that only has one customer
+			SELECT City, 
+			GROUP_CONCAT(CustomerName ORDER BY CustomerName SEPARATOR ', ') AS AllCustomersInCity
+			FROM Customers
+			GROUP BY City HAVING COUNT(*) > 1 -- only group cities that appear more than once
+			ORDER BY City;
+			
+		\end{lstlisting}
+		
+		\item \texttt{\color{red}UNION}: merge columns from two tables and drop all duplicates. \texttt{\color{red}UNION ALL}: merge columns from two tables without dropping duplicates.
+		
+		\begin{lstlisting}
+			SELECT City FROM Customers
+			UNION
+			SELECT City FROM Suppliers;
+			
+			SELECT 'Customer' AS Type, ContactName, City, Country -- create a column named "Type" such that all its elements are "Customer" strings.
+			FROM Customers
+			UNION
+			SELECT 'Supplier', ContactName, City, Country
+			FROM Suppliers;
+			
+			SELECT City FROM Customers1
+			UNION
+			SELECT City FROM Customers2
+			UNION
+			SELECT City FROM Suppliers; -- can union multiple tables
+		\end{lstlisting}
+	\end{itemize}
+	
+	\subsection{Group by}
+	\begin{itemize}
+		\item \texttt{\color{red}GROUP BY}: this is very simple and straightforward.
+		
+		\begin{lstlisting}
+			SELECT COUNT(CustomerID), Country
+			FROM Customers
+			GROUP BY Country
+			ORDER BY COUNT(CustomerID) DESC;
+		\end{lstlisting}
+		
+		The \texttt{\color{red}HAVING} clause is used after \texttt{\color{red}GROUP BY} to place condition on which values of column being grouped by to display.
+		
+		\begin{lstlisting}
+			SELECT col1, col2, ...
+			FROM table1
+			WHERE condition1
+			GROUP BY col3
+			HAVING condition2;
+		\end{lstlisting}
 		
 	\end{itemize}
 	
